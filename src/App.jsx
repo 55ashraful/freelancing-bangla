@@ -56,6 +56,7 @@ const Home = () => {
   const [title, setTitle] = useState('');
   const [budget, setBudget] = useState('');
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
@@ -64,10 +65,17 @@ const Home = () => {
   }, []);
 
   const fetchProjects = async () => {
-    const querySnapshot = await getDocs(collection(db, "projects"));
-    const projectsArray = [];
-    querySnapshot.forEach((doc) => { projectsArray.push({ ...doc.data(), id: doc.id }); });
-    setProjects(projectsArray);
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, "projects"));
+      const projectsArray = [];
+      querySnapshot.forEach((doc) => { projectsArray.push({ ...doc.data(), id: doc.id }); });
+      setProjects(projectsArray);
+    } catch (error) {
+      console.log("ডাটাবেজ এরর:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePostProject = async (e) => {
@@ -91,9 +99,11 @@ const Home = () => {
           <button type="submit" className="btn-submit">পোস্ট করুন</button>
         </form>
       </div>
+      
       <div className="projects-list">
         <h2>সাম্প্রতিক প্রজেক্ট</h2>
-        {projects.length === 0 ? <p>কোনো প্রজেক্ট নেই।</p> : 
+        {loading ? <p>ডাটা লোড হচ্ছে...</p> : 
+          projects.length === 0 ? <p>এখনো কোনো প্রজেক্ট পোস্ট করা হয়নি। উপরে থেকে প্রথম প্রজেক্টটি পোস্ট করুন!</p> : 
           projects.map(project => (
             <div key={project.id} className="project-card">
               <h3>{project.title}</h3>
@@ -166,10 +176,14 @@ const Admin = () => {
   }, []);
 
   const fetchAdminData = async () => {
-    const usersSnap = await getDocs(collection(db, "users"));
-    setUsers(usersSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-    const projSnap = await getDocs(collection(db, "projects"));
-    setProjects(projSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    try {
+      const usersSnap = await getDocs(collection(db, "users"));
+      setUsers(usersSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      const projSnap = await getDocs(collection(db, "projects"));
+      setProjects(projSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    } catch (error) {
+      console.log("Admin Error:", error);
+    }
   };
 
   const handleDeleteUser = async (id) => { if (window.confirm("ডিলিট করতে চান?")) { await deleteDoc(doc(db, "users", id)); fetchAdminData(); } };
