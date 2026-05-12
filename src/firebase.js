@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// এখানে আপনার Firebase Console থেকে প্রাপ্ত কনফিগারেশন বসান
+// আপনার ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
   apiKey: "AIzaSyCqr6T_UejxohwvEytWqqZb0YWTHPr0Fhk",
   authDomain: "my-freelance-77eaf.firebaseapp.com",
